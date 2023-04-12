@@ -9,3 +9,4 @@
 - Validação e transformação com ZOD
 - Field Arrays
 - Básico de TailwindCss
+- Composite Pattern
