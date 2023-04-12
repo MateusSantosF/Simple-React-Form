@@ -1,18 +1,12 @@
 import { useState } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, FormProvider } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Form } from './Components/Form';
 
 const createUserFormSchema = z.object({
-  email: z
-    .string()
-    .nonempty("E-mail é obrigatório")
-    .email("E-mail inválido")
-    .toLowerCase(),
-  password: z.string().min(5, "A senha deve ter pelo menos 5 caracteres"),
   name: z.string().transform((name) => {
     if (name.length == 0) return;
-
     return name
       .trim()
       .split(" ")
@@ -21,11 +15,17 @@ const createUserFormSchema = z.object({
       })
       .join(" ");
   }),
+  email: z
+  .string()
+  .nonempty("E-mail é obrigatório")
+  .email("E-mail inválido")
+  .toLowerCase(),
+
+  password: z.string().min(5, "A senha deve ter pelo menos 5 caracteres"),
   techs: z
     .array(
       z.object({
-        title: z.string().nonempty("Is required"),
-        knowledge: z.coerce.number().min(1, 'Seu nível de conhecimento deve estar entre 1 e 100').max(100,'Seu conhecimento deve ser menor ou igual a 100'),
+        title: z.string().nonempty("Você precisa inserir um nome"),
       })
     )
     .min(1, "Insira pelo menos uma tecnologia"),
@@ -36,22 +36,24 @@ type createUserFormProps = z.infer<typeof createUserFormSchema>;
 function App() {
   const [output, setOutput] = useState<string>();
 
-  const {
-    register,
-    handleSubmit,
-    control,
-    formState: { errors },
-  } = useForm<createUserFormProps>({
+  const createUserForm = useForm<createUserFormProps>({
     resolver: zodResolver(createUserFormSchema),
-  });
+  }); 
 
+  
+  const { 
+    handleSubmit, 
+    watch,
+    control,
+  } = createUserForm;
+  
   const { fields, append, remove } = useFieldArray({
     name: "techs",
     control,
   });
 
   const addNewTech = () => {
-    append({ title: "", knowledge: 0 });
+    append({ title: ""});
   };
 
   const authUser = (data: any) => {
@@ -62,103 +64,79 @@ function App() {
     <main className="h-screen bg-zinc-950 text-zinc-300 flex flex-col items-center justify-center ">
 
       <h1 className="text uppercase  text-white text-5xl m-10">Simple Form using useForm and Zod</h1>
-      <form
-        noValidate
-        className="flex flex-col gap-4"
-        onSubmit={handleSubmit(authUser)}
-      >
-        <div className="flex flex-col gap-1">
-          <label htmlFor="name">Name</label>
-          <input
-            className="border border-zinc-200 rounded h-10 text-black p-2"
-            type="email"
-            {...register("name")}
-          />
-          {errors.name && (
-            <span className="text-red-500 text-sm">{errors.name.message}</span>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <label htmlFor="email">Email</label>
-          <input
-            className="border border-zinc-200 rounded h-10 text-black p-2"
-            type="email"
-            {...register("email")}
-          />
-          {errors.email && (
-            <span className="text-red-500 text-sm">{errors.email.message}</span>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <label htmlFor="password">Password</label>
-          <input
-            className="border border-zinc-200 rounded h-10 text-black p-2"
-            type="password"
-            {...register("password")}
-          />
-          {errors.password && (
-            <span className="text-red-500 text-sm">
-              {errors.password.message}
-            </span>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <label htmlFor="techs" className="flex justify-between">
-            Technologies
-            <button onClick={addNewTech} className="text-emerald-500 text-sm">
-              Add Tech
-            </button>
-          </label>
-
-          {fields?.map((field, index) => {
-            return (
-              <div key={field.id} className="flex flex-col gap-5">
-
-                <div className="flex gap-5">
-                  <div className="flex flex-col">
-                    <label>Name</label>
-                    <input
-                      className=" flex-1 border border-zinc-200 rounded h-10 text-black p-2"
-                      type="text"
-                      {...register(`techs.${index}.title`)}
-                    />
-                  </div>
-
-                  <div className="flex flex-col justify-center align-between">
-                      <label htmlFor="knowledge">Tech Level</label>
-                      <input
-                        className="w-16 border border-zinc-200 rounded h-10 text-black p-2"
-                        type="number"
-                        {...register(`techs.${index}.knowledge`)}
-                      />      
-                  </div>
-
-                </div>
-                  
-                <span className="text-red-500 text-sm">
-                    {errors.techs?.[index] &&
-                      errors.techs?.[index]?.knowledge?.message}
-                </span>           
-              </div>
-            );
-          })}
-        </div>
-        <span className="text-red-500 text-sm">
-          {errors.techs && errors.techs.message}
-        </span>
-
-        <button
-          type="submit"
-          className="bg-emerald-500 rounded font-semibold text-white h-10 hover:bg-emerald-600"
+      <FormProvider {...createUserForm}>
+        <form
+          noValidate
+          className="flex flex-col gap-4"
+          onSubmit={handleSubmit(authUser)}
         >
-          Sign In
-        </button>
-        <div className="flex flex-col gap-4"></div>
-      </form>
+          <Form.Field>
+            <Form.Label htmlFor="name">Name</Form.Label>
+            <Form.Input type="text" name="name" />
+            <Form.ErrorMessage field="name" />
+          </Form.Field>
+
+          <Form.Field>
+            <Form.Label htmlFor="name">Email</Form.Label>
+            <Form.Input type="email" name="email" />
+            <Form.ErrorMessage field="email" />
+          </Form.Field>
+
+          <Form.Field>
+            <Form.Label htmlFor="password">Password</Form.Label>
+            <Form.Input type="password" name="password" />
+            <Form.ErrorMessage field="password" />
+          </Form.Field>
+
+
+          <Form.Field>
+            <Form.Label>
+              Tecnologias
+
+              <button 
+                type="button" 
+                onClick={addNewTech}
+                className="text-emerald-500 font-semibold text-xs flex items-center gap-1"
+              >
+                Adicionar nova
+              </button>
+            </Form.Label>
+            <Form.ErrorMessage field="techs" />
+
+            {fields.map((field, index) => {
+              const fieldName = `techs.${index}.title`
+
+              return (
+                <Form.Field key={field.id}>
+                  <div className="flex gap-2 items-center">
+                    <Form.Input type={fieldName} name={fieldName} />
+                    <button 
+                      type="button" 
+                      onClick={() => remove(index)}
+                      className="text-red-500"
+                    >
+                    Apagar
+                    </button>
+                  </div>
+                  <Form.ErrorMessage field={fieldName} />
+                </Form.Field>
+              )
+            })}
+          </Form.Field>
+        
+
+          <button
+            type="submit"
+            className="bg-emerald-500 rounded font-semibold text-white h-10 hover:bg-emerald-600"
+          >
+            Sign In
+          </button>
+          <div className="flex flex-col gap-4"></div>
+        </form>
+      </FormProvider>
+
       <pre>{output}</pre>
+
     </main>
   );
 }
