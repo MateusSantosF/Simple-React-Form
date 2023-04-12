@@ -25,7 +25,7 @@ const createUserFormSchema = z.object({
     .array(
       z.object({
         title: z.string().nonempty("Is required"),
-        knowledge: z.coerce.number().min(1).max(100),
+        knowledge: z.coerce.number().min(1, 'Seu nível de conhecimento deve estar entre 1 e 100').max(100,'Seu conhecimento deve ser menor ou igual a 100'),
       })
     )
     .min(1, "Insira pelo menos uma tecnologia"),
@@ -60,6 +60,8 @@ function App() {
 
   return (
     <main className="h-screen bg-zinc-950 text-zinc-300 flex flex-col items-center justify-center ">
+
+      <h1 className="text uppercase  text-white text-5xl m-10">Simple Form using useForm and Zod</h1>
       <form
         noValidate
         className="flex flex-col gap-4"
@@ -105,7 +107,7 @@ function App() {
 
         <div className="flex flex-col gap-1">
           <label htmlFor="techs" className="flex justify-between">
-            Tecnologies
+            Technologies
             <button onClick={addNewTech} className="text-emerald-500 text-sm">
               Add Tech
             </button>
@@ -113,21 +115,33 @@ function App() {
 
           {fields?.map((field, index) => {
             return (
-              <div key={field.id} className="flex gap-5">
-                <input
-                  className="flex-1 border border-zinc-200 rounded h-10 text-black p-2"
-                  type="text"
-                  {...register(`techs.${index}.title`)}
-                />
-                <input
-                  className="w-16 border border-zinc-200 rounded h-10 text-black p-2"
-                  type="number"
-                  {...register(`techs.${index}.knowledge`)}
-                />
+              <div key={field.id} className="flex flex-col gap-5">
+
+                <div className="flex gap-5">
+                  <div className="flex flex-col">
+                    <label>Name</label>
+                    <input
+                      className=" flex-1 border border-zinc-200 rounded h-10 text-black p-2"
+                      type="text"
+                      {...register(`techs.${index}.title`)}
+                    />
+                  </div>
+
+                  <div className="flex flex-col justify-center align-between">
+                      <label htmlFor="knowledge">Tech Level</label>
+                      <input
+                        className="w-16 border border-zinc-200 rounded h-10 text-black p-2"
+                        type="number"
+                        {...register(`techs.${index}.knowledge`)}
+                      />      
+                  </div>
+
+                </div>
+                  
                 <span className="text-red-500 text-sm">
-                  {errors.techs?.[index] &&
-                    errors.techs?.[index]?.knowledge?.message}
-                </span>
+                    {errors.techs?.[index] &&
+                      errors.techs?.[index]?.knowledge?.message}
+                </span>           
               </div>
             );
           })}
