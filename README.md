@@ -28,7 +28,7 @@ Esse projeto foi desenvolvido com as seguintes tecnologias:
 
 ## 💻 Projeto
 
-SimpleReactForm é um projeto de aprendizado, objetivando compreender o desenvolvimento de formulários em React utilizando a bibilioteca Zod.
+SimpleReactForm é um projeto de aprendizagem, objetivando compreender o desenvolvimento de formulários em React utilizando a bibilioteca Zod.
 
 ## 📚 Aprendizados
 
